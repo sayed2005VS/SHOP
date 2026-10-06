@@ -1022,7 +1022,15 @@
   font-weight: 700;
 }
 .auction__cover {
+	z-index: 0;
   object-position: center center;
+}
+.phead--auction::before {
+	z-index: 1;
+}
+.phead--auction > .container {
+	position: relative;
+	z-index: 2;
 }
 .auction-grid {
   display: grid;
