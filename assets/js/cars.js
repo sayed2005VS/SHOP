@@ -35,7 +35,8 @@
 		fuel: p.get('fuel') || '',
 		year: p.get('year') || '',
 		offer: p.get('offer') === '1',
-		sort: p.get('sort') || 'new'
+		sort: p.get('sort') || 'new',
+		view: p.get('view') === 'list' ? 'list' : 'grid'
 	};
 	// Homepage search sends Arabic body names and one "budget" field for both cash and finance.
 	Object.keys(BODY_ALIAS).forEach(function (k) { if (state.body === BODY_ALIAS[k]) { state.body = k; } });
@@ -113,7 +114,7 @@
 		}).map(function (b) {
 			var on = state.brand.indexOf(b) !== -1;
 			return '<label class="fbrand"><input type="checkbox" value="' + b + '"' + (on ? ' checked' : '') + '>' +
-				'<img src="assets/img/logos/brands/' + b + '.png" alt="" loading="lazy"><span>' + C.BRANDS[b].ar + '</span><small>' + (brandCounts[b] || 0) + '</small></label>';
+				'<img src="assets/img/logos/brands/' + b + '.webp" alt="" loading="lazy"><span>' + C.BRANDS[b].ar + '</span><small>' + (brandCounts[b] || 0) + '</small></label>';
 		}).join('');
 
 		$('[data-f-body]').innerHTML = BODIES.map(function (b) {
@@ -132,6 +133,17 @@
 	var countEl = $('[data-count]');
 	var tagsEl = $('[data-tags]');
 	var banner = $('[data-brand-banner]');
+	var viewButtons = Array.prototype.slice.call(document.querySelectorAll('[data-view]'));
+
+	function syncViewState() {
+		grid.classList.toggle('is-list', state.view === 'list');
+		grid.classList.toggle('is-grid', state.view === 'grid');
+		viewButtons.forEach(function (button) {
+			var active = button.dataset.view === state.view;
+			button.classList.toggle('is-active', active);
+			button.setAttribute('aria-pressed', active ? 'true' : 'false');
+		});
+	}
 
 	function tags() {
 		var t = [];
@@ -154,9 +166,9 @@
 		var b = state.brand[0];
 		var info = C.BRANDS[b];
 		banner.hidden = false;
-		banner.innerHTML = '<img src="assets/img/logos/brands/' + b + '.png" alt="">' +
+		banner.innerHTML = '<img src="assets/img/logos/brands/' + b + '.webp" alt="">' +
 			'<div><h2>سيارات ' + info.ar + ' الجديدة</h2><p>صناعة ' + C.ORIGINS[info.origin].ar.replace(/ة$/, 'ة') + ' · بضمان الوكيل · كاش أو تقسيط</p></div>' +
-			'<a href="brands.html" class="link-more">كل الماركات</a>';
+			'<a href="brands.html" class="link-more">كل العلامات التجارية</a>';
 	}
 
 	function syncUrl() {
@@ -172,6 +184,7 @@
 		if (state.year) { q.set('year', state.year); }
 		if (state.offer) { q.set('offer', '1'); }
 		if (state.sort !== 'new') { q.set('sort', state.sort); }
+		if (state.view !== 'grid') { q.set('view', state.view); }
 		var s = q.toString();
 		history.replaceState(null, '', location.pathname + (s ? '?' + s : ''));
 	}
@@ -179,6 +192,7 @@
 	var first = true;
 	function render() {
 		var list = results();
+		syncViewState();
 		countEl.innerHTML = '<span>' + list.length + '</span> ' + (list.length === 1 ? 'سيارة' : (list.length === 2 ? 'سيارتان' : (list.length <= 10 ? 'سيارات' : 'سيارة')));
 		$('[data-apply-count]').textContent = list.length;
 		grid.innerHTML = list.length ? list.map(AS.carCard).join('') :
@@ -238,7 +252,7 @@
 		render();
 	});
 	function reset() {
-		state = { q: '', pay: state.pay, price: '', monthly: '', brand: [], origin: '', body: '', fuel: '', year: '', offer: false, sort: state.sort };
+		state = { q: '', pay: state.pay, price: '', monthly: '', brand: [], origin: '', body: '', fuel: '', year: '', offer: false, sort: state.sort, view: state.view };
 		search.value = '';
 		render();
 	}
@@ -247,6 +261,13 @@
 	var sort = $('[data-sort]');
 	sort.value = state.sort;
 	sort.addEventListener('change', function () { state.sort = sort.value; render(); });
+
+	viewButtons.forEach(function (button) {
+		button.addEventListener('click', function () {
+			state.view = button.dataset.view;
+			render();
+		});
+	});
 
 	// Mobile: filters slide in as a drawer.
 	var scrim = $('[data-scrim]');

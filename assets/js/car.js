@@ -79,7 +79,7 @@
 		$('[data-name]').textContent = car.name;
 		$('[data-crumb-name]').textContent = car.name;
 		var crumbBrand = $('[data-crumb-brand]');
-		crumbBrand.textContent = car.brandName || 'الماركات';
+		crumbBrand.textContent = car.brandName || 'العلامات التجارية';
 		crumbBrand.href = 'cars.html?brand=' + car.brand;
 
 		// Meta chips
@@ -144,6 +144,7 @@
 	var view = [];
 	var at = 0;
 	var tab = 'ext';
+	var galleryAuto = null;
 	function renderGallery() {
 		shots = (car.images || []).map(function (im, i) { im.n = i; return im; });
 		var ext = shots.filter(function (s) { return s.kind === 'ext'; });
@@ -168,6 +169,17 @@
 		$('[data-gallery-img]').addEventListener('click', function () { if (!stage.dataset.swiped) { openLightbox(); } });
 		$('[data-gallery-open]').addEventListener('click', openLightbox);
 		setTab(tab, true);
+		var pause = document.createElement('button');
+		pause.type = 'button'; pause.className = 'carousel-toggle gallery__pause';
+		$('.gallery__bar').appendChild(pause);
+		var lightboxPause = document.createElement('button');
+		lightboxPause.type='button';lightboxPause.className='carousel-toggle';
+		$('[data-lightbox]').appendChild(lightboxPause);
+		galleryAuto = window.ASCarousel.autoplay(function () { show(at + 1); }, function () { return view.length > 1; }, 5500, [pause,lightboxPause]);
+		$('.gallery').addEventListener('click', function (event) { if (event.target.closest('button')) { galleryAuto.restart(); } });
+		var thumbs = $('[data-gallery-thumbs]'), thumbStart = 0;
+		window.ASCarousel.drag(thumbs, {allowButtons:true,start:function () { thumbStart=thumbs.scrollLeft; galleryAuto.hold(true); }, move:function (dx) { thumbs.scrollLeft=thumbStart-dx; }, finish:function () { galleryAuto.hold(false); }}, false);
+
 	}
 	function setTab(t, first) {
 		tab = t;
@@ -184,6 +196,7 @@
 		$$('.thumb').forEach(function (b) { b.addEventListener('click', function () { show(+b.dataset.i); }); });
 		at = 0;
 		show(0, first);
+		if (galleryAuto) { galleryAuto.restart(); }
 	}
 	function show(i, instant) {
 		if (!view.length) { return; }
@@ -191,6 +204,7 @@
 		var img = $('[data-gallery-img]');
 		var s = view[at];
 		var apply = function () {
+			delete img.dataset.fallbackUsed;
 			img.src = s.src;
 			img.width = s.w || 1400;
 			img.height = s.h || 1050;
@@ -211,22 +225,16 @@
 			if (k === at) { b.setAttribute('aria-current', 'true'); } else { b.removeAttribute('aria-current'); }
 		});
 		var active = $('.thumb.is-active');
-		if (active && !instant) { active.scrollIntoView({ block: 'nearest', inline: 'center', behavior: AS.reduce ? 'auto' : 'smooth' }); }
+		if (active && !instant) {
+			var thumbs = $('[data-gallery-thumbs]'), box = thumbs.getBoundingClientRect(), item = active.getBoundingClientRect();
+			thumbs.scrollBy({ left: item.left - box.left - (box.width - item.width) / 2, behavior: AS.reduce ? 'auto' : 'smooth' });
+		}
 		if (lb && !lb.hidden) { lbShow(); }
 	}
 	function swipe(el, fn) {
-		var x0 = null;
-		el.addEventListener('pointerdown', function (e) { if (e.pointerType !== 'mouse') { x0 = e.clientX; } });
-		el.addEventListener('pointerup', function (e) {
-			if (x0 === null) { return; }
-			var dx = e.clientX - x0;
-			x0 = null;
-			// RTL: swiping right brings the next photo. A swipe must not also count as a tap.
-			if (Math.abs(dx) > 40) {
-				el.dataset.swiped = "1";
-				setTimeout(function () { delete el.dataset.swiped; }, 350);
-				fn(dx > 0 ? 1 : -1);
-			}
+		window.ASCarousel.swipe(el, fn, {
+			start:function () { if (galleryAuto) { galleryAuto.hold(true); } },
+			finish:function () { if (galleryAuto) { galleryAuto.hold(false); } }
 		});
 	}
 
@@ -234,6 +242,7 @@
 	var lastFocus = null;
 	function lbShow() {
 		var s = view[at];
+		delete $('[data-lb-img]').dataset.fallbackUsed;
 		$('[data-lb-img]').src = s.src;
 		$('[data-lb-img]').alt = $('[data-gallery-img]').alt;
 		$('[data-lb-counter]').textContent = (at + 1) + ' / ' + view.length;
@@ -399,6 +408,10 @@
 		$$('[data-open-request]').forEach(function (b) {
 			b.addEventListener('click', function (e) {
 				e.preventDefault();
+				if (b.dataset.openRequest === 'cash' || b.dataset.openRequest === 'drive') {
+					window.location.href = 'request.html?type=' + encodeURIComponent(b.dataset.openRequest) + '&car=' + encodeURIComponent(car.name) + '&price=' + encodeURIComponent(car.price || '');
+					return;
+				}
 				setPay(b.dataset.openRequest);
 				$('[data-req-car]').textContent = car.name + (color ? ' · ' + color : '');
 				$('[data-req-error]').hidden = true;

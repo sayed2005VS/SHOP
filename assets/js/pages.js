@@ -55,7 +55,7 @@
 			var info = C.BRANDS[b];
 			var n = counts[b] || 0;
 			return '<li class="btile" data-origin="' + info.origin + '"><a href="cars.html?brand=' + b + '">' +
-				'<img src="assets/img/logos/brands/' + b + '.png" alt="" loading="lazy">' +
+				'<img src="assets/img/logos/brands/' + b + '.webp" alt="" loading="lazy">' +
 				'<div><strong>' + info.ar + '</strong><span>' + C.ORIGINS[info.origin].ar + '</span></div>' +
 				'<em>' + (n ? AS.carsLabel(n) : 'اطلبها') + '</em></a></li>';
 		}).join('');

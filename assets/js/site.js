@@ -8,9 +8,27 @@
 		gsap.registerPlugin(ScrollTrigger);
 		document.documentElement.classList.add('has-gsap');
 	}
+	if (!hasGsap && 'IntersectionObserver' in window && document.body.classList.contains('page-inner')) {
+		var pageReveal = new IntersectionObserver(function (entries, observer) {
+			entries.forEach(function (entry) {
+				if (!entry.isIntersecting) { return; }
+				entry.target.classList.add('is-visible');
+				observer.unobserve(entry.target);
+			});
+		}, { rootMargin: '0px 0px -10% 0px', threshold: 0.06 });
+		document.querySelectorAll('.page-inner main .section > .container').forEach(function (section) {
+			pageReveal.observe(section);
+		});
+	}
 
 	var fmt = new Intl.NumberFormat('en-US');
 	var WA = 'https://wa.me/966920035742?text=';
+	var favicon = document.createElement('link');
+	favicon.rel = 'icon'; favicon.type = 'image/webp'; favicon.href = 'assets/img/brand/logo.webp';
+	document.head.appendChild(favicon);
+	var touchIcon = document.createElement('link');
+	touchIcon.rel = 'apple-touch-icon'; touchIcon.href = 'assets/img/brand/logo.webp';
+	document.head.appendChild(touchIcon);
 
 	function esc(s) {
 		return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
@@ -38,10 +56,10 @@
 		var meta = [c.body, c.gearbox, c.fuel].filter(Boolean).join(' · ');
 		var price = c.price
 			? '<span class="car__price-label">' + (c.was ? '<s>' + fmt.format(c.was) + '</s> ' : '') + 'كاش شامل الضريبة</span><span class="car__price-value">' + fmt.format(c.price) + ' <small>ريال</small></span>' +
-				'<span class="car__monthly">أو ' + fmt.format(monthly(c.price)) + ' ريال شهريًا</span>'
+				'<span class="car__monthly">أو ' + fmt.format(monthly(c.price)) + ' ريال شهريًا تقريبًا</span>'
 			: '<span class="car__price-label">كاش أو تقسيط</span><span class="car__price-value">اطلب عرض سعر</span>';
 		var msg = encodeURIComponent('مرحبًا، أرغب في طلب ' + c.name);
-		return '<article class="car" data-brand="' + c.brand + '">' +
+		return '<article class="car" data-brand="' + c.brand + '" data-car-href="' + carUrl(c.id) + '" tabindex="0" role="link">' +
 			'<div class="car__media"><img class="car__img" src="' + c.img + '" alt="' + esc(c.name) + '" loading="lazy" width="' + (c.w || 1200) + '" height="' + (c.h || 900) + '"><span class="car__sheen" aria-hidden="true"></span></div>' +
 			'<div class="car__top">' +
 				'<div><h3 class="car__title"><a href="' + carUrl(c.id) + '">' + esc(c.name) + '</a></h3><p class="car__meta">' + esc(meta) + '</p></div>' +
@@ -50,8 +68,8 @@
 			'<div class="car__bottom">' +
 				'<div class="car__price">' + price + '</div>' +
 				'<div class="car__actions">' +
-					'<a href="' + WA + msg + '" class="btn btn--light" target="_blank" rel="noopener">اطلب الآن</a>' +
-					'<a href="' + carUrl(c.id) + '" class="btn btn--glass">التفاصيل</a>' +
+					'<a href="' + WA + msg + '" class="btn btn--red" target="_blank" rel="noopener">اطلب الآن</a>' +
+					'<a href="' + carUrl(c.id) + '" class="btn btn--outline">التفاصيل</a>' +
 				'</div>' +
 			'</div>' +
 		'</article>';
@@ -85,22 +103,49 @@
 		});
 	}
 
+	document.addEventListener('click', function (e) {
+		var button = e.target.closest('.car__actions .btn--red');
+		if (!button) { return; }
+		var card = button.closest('.car');
+		var title = card && card.querySelector('.car__title');
+		var value = card && card.querySelector('.car__price-value');
+		if (!title) { return; }
+		e.preventDefault();
+		window.location.href = 'request.html?type=cash&car=' + encodeURIComponent(title.textContent.trim()) + '&price=' + encodeURIComponent(value ? value.textContent.replace(/[^0-9]/g, '') : '');
+	}, false);
+	document.addEventListener('click', function (e) {
+		var link = e.target.closest('a, button');
+		if (!link || link.closest('.car__actions') || !/اطلب الآن|اطلب سيارتك/.test(link.textContent.trim())) { return; }
+		e.preventDefault();
+		window.location.href = 'request.html';
+	}, false);
+
 	window.AS = {
 		reduce: reduce, hasGsap: hasGsap, fmt: fmt, WA: WA, esc: esc, carsLabel: carsLabel,
 		carUrl: carUrl, monthly: monthly, carCard: carCard, onView: onView, revealHeadings: revealHeadings
 	};
 
-	/* ---------- Header: solid after the top, hides while scrolling down ---------- */
+	document.addEventListener('click', function (event) {
+		var card = event.target.closest('.car[data-car-href]');
+		if (!card || event.target.closest('a, button, input, select, textarea')) { return; }
+		window.location.href = card.dataset.carHref;
+	});
+	document.addEventListener('keydown', function (event) {
+		var card = event.target.closest('.car[data-car-href]');
+		if (card && (event.key === 'Enter' || event.key === ' ')) {
+			event.preventDefault();
+			window.location.href = card.dataset.carHref;
+		}
+	});
+
+	/* ---------- Header: stays available while scrolling ---------- */
 	var header = document.getElementById('header');
 	var lastY = window.scrollY;
 	var navOpen = false;
 	function onScroll() {
 		var y = window.scrollY;
 		header.classList.toggle('is-solid', y > 40 || navOpen);
-		if (!navOpen) {
-			if (y > lastY + 4 && y > 700) { header.classList.add('is-hidden'); }
-			else if (y < lastY - 4 || y < 700) { header.classList.remove('is-hidden'); }
-		}
+		header.classList.remove('is-hidden');
 		lastY = y;
 	}
 	window.addEventListener('scroll', onScroll, { passive: true });
@@ -109,15 +154,35 @@
 	/* ---------- Mobile menu ---------- */
 	var burger = document.getElementById('burger');
 	var nav = document.getElementById('nav');
-	burger.addEventListener('click', function () {
-		navOpen = burger.getAttribute('aria-expanded') !== 'true';
+	function setMobileNavState(isOpen) {
+		navOpen = isOpen;
 		burger.setAttribute('aria-expanded', String(navOpen));
 		burger.setAttribute('aria-label', navOpen ? 'إغلاق القائمة' : 'فتح القائمة');
 		nav.classList.toggle('is-open', navOpen);
+		document.body.classList.toggle('mobile-nav-open', navOpen);
 		header.classList.remove('is-hidden');
 		header.classList.toggle('is-solid', navOpen || window.scrollY > 40);
 		document.body.style.overflow = navOpen ? 'hidden' : '';
+	}
+	burger.addEventListener('click', function () {
+		if (window.closeCustomSelects) { window.closeCustomSelects(); }
+		setMobileNavState(!navOpen);
 	});
+
+	document.addEventListener('keydown', function (event) {
+		if (event.key === 'Escape' && navOpen) { burger.click(); burger.focus(); }
+	});
+	window.addEventListener('resize', function () {
+		if (window.innerWidth > 1080 && navOpen) {
+			setMobileNavState(false);
+		}
+	});
+	window.addEventListener('scroll', function () {
+		if (navOpen && window.innerWidth <= 1080) {
+			header.classList.remove('is-hidden');
+			header.classList.add('is-solid');
+		}
+	}, { passive: true });
 
 	/* ---------- Open / closed now (Riyadh time) ---------- */
 	(function () {

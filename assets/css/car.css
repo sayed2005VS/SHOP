@@ -133,18 +133,44 @@
 
 /* ---------- Purchase card ---------- */
 .buy {
-	padding: 28px;
-	background: var(--white);
-	border-radius: var(--radius-lg);
-	box-shadow: var(--shadow-lg);
+	padding: 20px 18px 18px;
+	background: #f6f8fa;
+	border: 1px solid #dfe7ee;
+	border-radius: 22px;
+	box-shadow: 0 16px 36px rgba(16, 29, 43, 0.08);
 }
-.buy__badges { display: flex; gap: 6px; margin-bottom: 12px; }
-.badge--soft { background: var(--soft); color: var(--navy-900); backdrop-filter: none; }
-.buy__title { font-size: clamp(1.5rem, 1.1rem + 1vw, 2rem); font-weight: 700; line-height: 1.35; color: var(--navy-900); }
-.buy__meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
-.buy__meta li { padding: 3px 12px; background: var(--soft); border-radius: 999px; font-size: var(--fs-xs); font-weight: 600; color: var(--muted); }
-.buy__label { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--line); font-size: var(--fs-sm); font-weight: 600; color: var(--muted); }
-.buy__amount { margin-top: 6px; color: var(--navy-900); line-height: 1.15; }
+.buy__badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.badge--soft { background: rgba(255,255,255,0.5); color: var(--navy-900); backdrop-filter: none; }
+.buy__title {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 86px;
+	padding: 18px 22px;
+	margin: 0;
+	background: linear-gradient(145deg, #ffffff 0%, #edf4f8 100%);
+	border: 1px solid #d7e3eb;
+	border-top: 4px solid var(--red);
+	border-radius: 16px;
+	font-size: clamp(1.5rem, 1.1rem + 1vw, 2rem);
+	font-weight: 700;
+	line-height: 1.35;
+	color: var(--navy-900);
+	text-align: center;
+	box-shadow: 0 8px 20px rgba(37, 77, 112, 0.07);
+}
+.buy__meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.buy__meta li {
+	padding: 6px 12px;
+	background: rgba(255,255,255,0.6);
+	border: 1px solid rgba(31,52,74,0.08);
+	border-radius: 999px;
+	font-size: var(--fs-xs);
+	font-weight: 600;
+	color: var(--navy-900);
+}
+.buy__label { margin-top: 22px; font-size: var(--fs-sm); font-weight: 600; color: var(--muted); }
+.buy__amount { margin-top: 8px; color: var(--navy-900); line-height: 1.15; }
 .buy__amount strong { font-size: 2.5rem; font-weight: 700; letter-spacing: -0.02em; }
 .buy__amount span { font-size: var(--fs-md); color: var(--muted); }
 .buy__amount--ask strong { font-size: 1.75rem; color: var(--red); letter-spacing: 0; }
@@ -152,15 +178,16 @@
 .buy__monthly {
 	margin-top: 14px;
 	padding: 12px 14px;
-	background: var(--soft);
+	background: rgba(255,255,255,0.7);
 	border-inline-start: 3px solid var(--red);
-	border-radius: 6px;
+	border-radius: 10px;
 	font-size: var(--fs-sm);
 	color: var(--navy-900);
+	box-shadow: inset 0 0 0 1px rgba(16, 29, 43, 0.04);
 }
 .buy__monthly small { display: block; margin-top: 2px; font-size: 0.75rem; color: var(--muted); }
 .buy__colors { margin-top: 20px; }
-.buy__colors-label { font-size: var(--fs-sm); color: var(--muted); }
+.buy__colors-label { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: var(--fs-sm); color: var(--muted); }
 .buy__colors-label strong { color: var(--navy-900); }
 .swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
 .swatch {
@@ -176,19 +203,40 @@
 }
 .swatch:hover { transform: scale(1.08); }
 .swatch.is-active { box-shadow: 0 0 0 2px var(--red); }
-.buy__ctas { display: grid; gap: 10px; margin-top: 24px; }
+.buy__ctas { display: grid; gap: 12px; margin-top: 24px; }
 .buy__row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.buy__row .btn { min-height: 48px; }
-.btn--ghost-dark { border-color: var(--line); color: var(--navy-900); }
+.buy__row .btn,
+.buy__ctas .btn,
+.buy__drive {
+	min-height: 52px;
+	border-radius: 14px;
+	font-weight: 700;
+}
+.btn--ghost-dark { border-color: var(--line); color: var(--navy-900); background: rgba(255,255,255,0.75); }
 .btn--ghost-dark:hover { border-color: var(--navy); }
-.buy__perks { display: grid; gap: 8px; margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--line); font-size: var(--fs-sm); color: var(--navy-900); }
-.buy__perks li { display: flex; align-items: center; gap: 8px; }
+.buy__perks {
+	display: grid;
+	gap: 10px;
+	margin-top: 20px;
+	padding-top: 20px;
+	border-top: 1px solid rgba(19, 35, 52, 0.08);
+	font-size: var(--fs-sm);
+	color: var(--navy-900);
+}
+.buy__perks li {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 2px 0;
+	line-height: 1.6;
+}
 .buy__perks li::before {
 	content: "";
 	flex: 0 0 18px;
 	height: 18px;
 	background: var(--red) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M9 16.2l-3.5-3.5L4 14.2l5 5 11-11-1.4-1.4z'/%3E%3C/svg%3E") center / 13px no-repeat;
 	border-radius: 50%;
+	box-shadow: 0 0 0 4px rgba(37,77,112,0.08);
 }
 
 /* ---------- Content blocks in the main column ---------- */
@@ -221,7 +269,7 @@
 	width: 44px;
 	height: 44px;
 	padding: 10px;
-	background: rgba(215, 38, 46, 0.08);
+	background: rgba(37, 77, 112, 0.08);
 	border-radius: 10px;
 	color: var(--red);
 }
@@ -301,7 +349,7 @@ a.trim:hover { border-color: var(--navy); box-shadow: var(--shadow); }
 .trim__body strong { color: var(--navy-900); }
 .trim__body small { color: var(--muted); font-size: var(--fs-xs); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .trim__price { font-size: var(--fs-sm); font-weight: 600; color: var(--navy-900); white-space: nowrap; }
-.trim.is-current { border-color: var(--red); background: #fff8f8; }
+.trim.is-current { border-color: var(--red); background: #f1f6fa; }
 .trim__tag {
 	position: absolute;
 	top: -10px;
@@ -332,7 +380,7 @@ a.trim:hover { border-color: var(--navy); box-shadow: var(--shadow); }
 
 /* ---------- Similar cars: three per row ---------- */
 .cars--3 { grid-template-columns: repeat(3, 1fr); }
-.cars--3 .car { aspect-ratio: 4 / 4.2; padding: 18px; }
+.cars--3 .car { aspect-ratio: auto; height: auto; min-height: 0; padding: 18px; }
 .cars--3 .car__title { font-size: var(--fs-md); }
 .cars--3 .car__bottom { flex-direction: column; align-items: stretch; }
 .cars--3 .car__actions .btn { flex: 1; }
